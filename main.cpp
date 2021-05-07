@@ -49,7 +49,7 @@
                                   
 #define SysMilliS() (uint32_t)Kernel::get_ms_count()                                      
 
-Serial pc(USBTX,USBRX,115200);          // set the debug serial line speed to 115200
+UnbufferedSerial pc(USBTX,USBRX,115200);          // set the debug serial line speed to 115200
 
 
 //---- TFT with resistive touchscreen pins -------------------------------------
