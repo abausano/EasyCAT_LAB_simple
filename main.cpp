@@ -23,7 +23,20 @@
 // 
 // EtherCAT® is a registered trademark and patented technology, licensed by Beckhoff Automation GmbH.
 // www.beckhoff.com
-// www.ethercat.org     
+// www.ethercat.org  
+
+
+//******************************************************************************
+
+//#define ADA_TFT       // IMPORTANT!!! 
+
+                        // If your EasyCAT LAB uses the Adafruit TFT
+                        // you must uncomment this define
+                        
+                        // If your EasyCAT LAB uses the Seeed Studio TFT
+                        // you must comment this define                                                  
+
+//******************************************************************************   
 
 
 #define ETH_TXBUFNB 16
@@ -56,6 +69,11 @@ UnbufferedSerial pc(USBTX,USBRX,115200);          // set the debug serial line s
 
 // the display used is the SeeedStudio 2.8 inch TFT v2.0
 // http://wiki.seeedstudio.com/2.8inch_TFT_Touch_Shield_v2.0/ 
+//
+// or the Adafruit 2.8" with resistive touchscreen
+// https://www.adafruit.com/product/1651
+
+// the touchscreen is not used in this example
 
 #define PIN_YP          A3                          // resistive touchscreen
 #define PIN_YM          A1                          //
@@ -65,8 +83,16 @@ UnbufferedSerial pc(USBTX,USBRX,115200);          // set the debug serial line s
 #define PIN_MOSI        D11                         // TFT display SPI
 #define PIN_MISO        D12                         //
 #define PIN_SCLK        D13                         //
-#define PIN_CS_TFT      D5                          //
-#define PIN_DC_TFT      D6                          //
+
+#if defined ADA_TFT                                 // pins for the Adafruit TFT                      
+    #define PIN_CS_TFT  D10                         //                 
+    #define PIN_DC_TFT  D9                          //                     
+    #define PIN_CS_TSC  D8                          // 
+    
+#else                                               // pins for the SeeedStudio TFT
+    #define PIN_CS_TFT  D5                          //    
+    #define PIN_DC_TFT  D6                          //
+#endif                                              //
 
 
 
@@ -195,7 +221,12 @@ int main()
   
     TFT.background(Black);                                          // init TFT  
     TFT.cls();                                                      //
-    TFT.set_orientation(3);                                         // 
+    
+    #if defined ADA_TFT
+        TFT.set_orientation(1);     
+    #else
+        TFT.set_orientation(3);                                        
+    #endif       
 
     DrawBanner();     
         
@@ -473,7 +504,15 @@ void DrawBanner()
     TFT.printf("www.easycatshield.com"); 
     
     TFT.locate(30, 190);
-    TFT.printf("https://openethercatsociety.github.io/");     
+    TFT.printf("https://openethercatsociety.github.io/");
+    
+    TFT.foreground(Red);    
+    TFT.locate(30, 220);    
+    #if defined ADA_TFT                                 
+        TFT.printf("Adafruit TFT");   
+    #else
+        TFT.printf("Seeed Studio TFT");
+    #endif             
 }  
 
 
