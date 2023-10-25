@@ -23,21 +23,23 @@
 // 
 // EtherCAT® is a registered trademark and patented technology, licensed by Beckhoff Automation GmbH.
 // www.beckhoff.com
-// www.ethercat.org  
+// www.ethercat.org     
 
 
 //******************************************************************************
 
-//#define ADA_TFT       // IMPORTANT!!! 
+                        // IMPORTANT!!! 
 
-                        // If your EasyCAT LAB uses the Adafruit TFT
+#define ADA_TFT       // If your EasyCAT LAB uses the Adafruit TFT
                         // you must uncomment this define
                         
-                        // If your EasyCAT LAB uses the Seeed Studio TFT
-                        // you must comment this define                                                  
-
-//******************************************************************************   
-
+//#define SEEED_TFT     // If your EasyCAT LAB uses the Seeed Studio TFT
+                        // you must uncomment this define     
+                        
+//#define PARA_TFT        // If your EasyCAT LAB uses the parallel interface TFT
+                        // you must uncomment this define                         
+                                                                     
+//******************************************************************************
 
 #define ETH_TXBUFNB 16
 #define ETH_RXBUFNB 16
@@ -72,27 +74,59 @@ UnbufferedSerial pc(USBTX,USBRX,115200);          // set the debug serial line s
 //
 // or the Adafruit 2.8" with resistive touchscreen
 // https://www.adafruit.com/product/1651
+//
+// or the parallel interface ARD SHD 2,8TD 
 
 // the touchscreen is not used in this example
 
-#define PIN_YP          A3                          // resistive touchscreen
-#define PIN_YM          A1                          //
-#define PIN_XM          A2                          //
-#define PIN_XP          A0                          //
-
-#define PIN_MOSI        D11                         // TFT display SPI
-#define PIN_MISO        D12                         //
-#define PIN_SCLK        D13                         //
-
-#if defined ADA_TFT                                 // pins for the Adafruit TFT                      
-    #define PIN_CS_TFT  D10                         //                 
+#ifdef ADA_TFT                                      // pins for the Adafruit TFT                      
+    #define PIN_CS_TFT  D10                         //               
     #define PIN_DC_TFT  D9                          //                     
     #define PIN_CS_TSC  D8                          // 
+
+    #define PIN_MOSI    D11                         // SPI
+    #define PIN_MISO    D12                         //
+    #define PIN_SCLK    D13                         // 
+#endif
     
-#else                                               // pins for the SeeedStudio TFT
+#ifdef SEEED_TFT                                    // pins for the SeeedStudio TFT
     #define PIN_CS_TFT  D5                          //    
     #define PIN_DC_TFT  D6                          //
+
+    #define PIN_MOSI    D11                         // SPI
+    #define PIN_MISO    D12                         //
+    #define PIN_SCLK    D13                         //    
 #endif                                              //
+
+#ifdef PARA_TFT                                     // pins for the parallel interface TFT
+    #define PIN_D0_TFT  D8                          //
+    #define PIN_D1_TFT  D9                          //
+    #define PIN_D2_TFT  D2                          //
+    #define PIN_D3_TFT  D3                          //
+    #define PIN_D4_TFT  D4                          //
+    #define PIN_D5_TFT  D5                          //
+    #define PIN_D6_TFT  D6                          //
+    #define PIN_D7_TFT  D7                          //
+                                                       
+    #define PIN_RD_TFT  A0                          //                
+    #define PIN_WR_TFT  A1                          //
+    #define PIN_DC_TFT  A2                          //
+    #define PIN_CS_TFT  A3                          //
+    #define PIN_RES_TFT A4                          //
+#endif
+
+ #ifdef SEEED_TFT
+    #define PIN_YP      A3                          // resistive touchscreen
+    #define PIN_YM      A1                          //
+    #define PIN_XM      A2                          //
+    #define PIN_XP      A0                          //
+#else                                               //
+    #define PIN_XP      A3                          //
+    #define PIN_YP      A2                          //
+    #define PIN_XM      D9                          //
+    #define PIN_YM      D8                          //  
+#endif
+                                           //
 
 
 
@@ -131,7 +165,18 @@ bool FirstRound;
 
 //------------------------------------------------------------------------------
 
-SPI_TFT_ILI9341 TFT(PIN_MOSI, PIN_MISO, PIN_SCLK, PIN_CS_TFT, NC, PIN_DC_TFT);
+#ifdef PARA_TFT
+    SPI_TFT_ILI9341 TFT(PIN_D0_TFT, PIN_D1_TFT, PIN_D2_TFT, PIN_D3_TFT, PIN_D4_TFT, PIN_D5_TFT,
+    PIN_D6_TFT, PIN_D7_TFT, PIN_RD_TFT, PIN_WR_TFT, PIN_CS_TFT, PIN_DC_TFT, PIN_RES_TFT, "PARA");
+#endif
+
+#ifdef ADA_TFT
+    SPI_TFT_ILI9341 TFT(PIN_MOSI, PIN_MISO, PIN_SCLK, PIN_CS_TFT, NC, PIN_DC_TFT, 27000000, "ADA");
+#endif
+
+#ifdef SEEED_TFT
+    SPI_TFT_ILI9341 TFT(PIN_MOSI, PIN_MISO, PIN_SCLK, PIN_CS_TFT, NC, PIN_DC_TFT, 27000000, "SEEED");
+#endif
 
 Ticker SampleTicker;
 Thread thread;
@@ -222,11 +267,15 @@ int main()
     TFT.background(Black);                                          // init TFT  
     TFT.cls();                                                      //
     
-    #if defined ADA_TFT
+    #ifdef ADA_TFT
         TFT.set_orientation(1);     
-    #else
+    #endif
+    #ifdef SEEED_TFT
         TFT.set_orientation(3);                                        
-    #endif       
+    #endif  
+    #ifdef PARA_TFT
+        TFT.set_orientation(1);                                        
+    #endif 
 
     DrawBanner();     
         
@@ -508,11 +557,15 @@ void DrawBanner()
     
     TFT.foreground(Red);    
     TFT.locate(30, 220);    
-    #if defined ADA_TFT                                 
+    #ifdef ADA_TFT                                 
         TFT.printf("Adafruit TFT");   
-    #else
+    #endif
+    #ifdef SEEED_TFT  
         TFT.printf("Seeed Studio TFT");
-    #endif             
+    #endif  
+    #ifdef PARA_TFT  
+        TFT.printf("Parallel TFT");
+    #endif  
 }  
 
 
