@@ -441,7 +441,7 @@ void Application()
         
                                                                     //----- slave LAB_2_1 data management ------            
                                                                     //    
-        Buttons_1 = in_LAB_2_1->Buttons;                            // read the buttons status from the slave  
+        Buttons_1 = in_LAB_1->Buttons;                              // read the buttons status from the slave  
                                                                     //            
         if (Buttons_1 != PrevButtons_1)                             // check if the buttons value has changed
         {                                                           //
@@ -449,14 +449,14 @@ void Application()
             DrawButtons_1_Value(Buttons_1);                         // draw the current buttons value on the TFT                                                                                              
         }                                                           //
                                                                     //
-        out_LAB_2_1->Segments = Buttons_2;                          // send to the slave the buttons status
+        out_LAB_1->Segments = Buttons_2;                            // send to the slave the buttons status
                                                                     // from the slave LAB_2_2                  
 
                                                                                                                     
                                                                     
                                                                     //----- slave 2_2 data management ----------                                                                      
                                                                     //
-        Buttons_2 = in_LAB_2_2->Buttons;                            // read the buttons status from the slave  
+        Buttons_2 = in_LAB_2->Buttons;                              // read the buttons status from the slave  
                                                                     //    
         if (Buttons_2 != PrevButtons_2)                             // check if the buttons value has changed
         {                                                           //
@@ -464,7 +464,7 @@ void Application()
             DrawButtons_2_Value(Buttons_2);                         // draw the current buttons value on the TFT                                                                                             
         }                                                           //
                                                                     //               
-        out_LAB_2_2->Segments = Buttons_1;                          // send to the slave the buttons status                                                                       
+        out_LAB_2->Segments = Buttons_1;                            // send to the slave the buttons status                                                                       
                                                                     // from the slave LAB_2_1                                                                        
                                                                                                                                           
                                            
